@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Knit</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">DeepBook Predict testnet</p>
+          <h1>Knit</h1>
+        </div>
+        <div class="wallet-strip">
+          <button class="icon-button" id="faucetButton" type="button" title="Faucet">D</button>
+          <button class="primary-button" id="walletButton" type="button">Google</button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="builder" aria-label="Knit note builder">
+          <div class="template-grid" role="tablist" aria-label="Product templates">
+            <button class="template-card is-active" type="button" data-template="range" role="tab" aria-selected="true">
+              <span>Range</span>
+              <strong>В коридоре</strong>
+              <small>1 range leg</small>
+            </button>
+            <button class="template-card" type="button" data-template="breakout" role="tab" aria-selected="false">
+              <span>Breakout</span>
+              <strong>Будет движ</strong>
+              <small>2 binary legs</small>
+            </button>
+            <button class="template-card" type="button" data-template="ladder" role="tab" aria-selected="false">
+              <span>Ladder</span>
+              <strong>Чем выше</strong>
+              <small>3 binary legs</small>
+            </button>
+          </div>
+
+          <div class="chart-band">
+            <div class="chart-head">
+              <div>
+                <p class="eyebrow">BTC oracle</p>
+                <h2 id="templateTitle">В коридоре</h2>
+              </div>
+              <div class="spot-tile">
+                <span>Spot</span>
+                <strong id="spotLabel">$65,000</strong>
+              </div>
+            </div>
+            <canvas id="payoffCanvas" width="1100" height="430" aria-label="Payoff chart"></canvas>
+          </div>
+
+          <div class="control-grid">
+            <label class="control" id="lowerControl">
+              <span id="lowerLabel">Lower strike</span>
+              <output id="lowerValue">$60,000</output>
+              <input id="lowerInput" type="range" min="52000" max="70000" step="250" value="60000" />
+            </label>
+            <label class="control" id="upperControl">
+              <span id="upperLabel">Higher strike</span>
+              <output id="upperValue">$70,000</output>
+              <input id="upperInput" type="range" min="60000" max="78000" step="250" value="70000" />
+            </label>
+            <label class="control" id="thirdControl">
+              <span>Third strike</span>
+              <output id="thirdValue">$73,000</output>
+              <input id="thirdInput" type="range" min="64000" max="82000" step="250" value="73000" />
+            </label>
+            <label class="control">
+              <span>Notional</span>
+              <output id="quantityValue">$10</output>
+              <input id="quantityInput" type="range" min="1" max="100" step="1" value="10" />
+            </label>
+          </div>
+        </section>
+
+        <aside class="side-panel" aria-label="Quote panel">
+          <div class="metrics">
+            <div class="metric">
+              <span>Вложишь</span>
+              <strong id="costMetric">$3.15</strong>
+            </div>
+            <div class="metric">
+              <span>Макс.</span>
+              <strong id="maxMetric">$10.00</strong>
+            </div>
+            <div class="metric">
+              <span>Шанс</span>
+              <strong id="chanceMetric">34%</strong>
+            </div>
+            <div class="metric">
+              <span>PTB</span>
+              <strong id="legsMetric">1 mint</strong>
+            </div>
+          </div>
+
+          <button class="create-button" id="createButton" type="button">Создать</button>
+
+          <div class="tx-preview">
+            <div>
+              <span>Manager</span>
+              <strong id="managerStatus">ready</strong>
+            </div>
+            <div>
+              <span>Quote</span>
+              <strong>DUSDC</strong>
+            </div>
+            <div>
+              <span>Flow</span>
+              <strong id="flowStatus">deposit + mint</strong>
+            </div>
+          </div>
+
+          <section class="portfolio" aria-label="Portfolio">
+            <div class="section-head">
+              <h2>Мои ноты</h2>
+              <span id="noteCount">0</span>
+            </div>
+            <div class="note-list" id="noteList"></div>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>

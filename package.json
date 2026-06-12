@@ -1,0 +1,17 @@
+{
+  "name": "knit",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "core:test": "node --test --experimental-strip-types packages/core/src/templates.test.ts",
+    "web:check": "node --check apps/web/src/app.js"
+  },
+  "devDependencies": {
+    "@mysten/sui": "^1.30.0",
+    "typescript": "^5.8.0"
+  }
+}

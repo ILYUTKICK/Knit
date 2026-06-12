@@ -1,0 +1,12 @@
+{
+  "name": "@knit/core",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@mysten/sui": "^1.30.0"
+  }
+}
