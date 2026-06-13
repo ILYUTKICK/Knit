@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "core:test": "node --test --experimental-strip-types packages/core/src/templates.test.ts",
+    "smoke:direct": "node --experimental-strip-types scripts/smoke-direct.ts",
     "web:check": "node --check apps/web/src/app.js"
   },
   "devDependencies": {

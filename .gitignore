@@ -3,6 +3,7 @@ dist/
 .next/
 .turbo/
 move/**/build/
+.knit-smoke.json
 .DS_Store
 *.log
 .env

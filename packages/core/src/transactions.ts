@@ -18,6 +18,11 @@ export type KeyedPredictInputs = ManagerOracleInputs & {
   expiryMs: bigint | number | string;
 };
 
+export type QuoteInspectInputs = {
+  oracleId: string;
+  expiryMs: bigint | number | string;
+};
+
 export type DirectMintParams = KeyedPredictInputs & {
   paymentCoinId: string;
   maxPayment: bigint | number | string;
@@ -220,7 +225,7 @@ export function buildKnitRedeemNoteTx(
   return tx;
 }
 
-export function buildQuoteInspectTx(params: KeyedPredictInputs & {
+export function buildQuoteInspectTx(params: QuoteInspectInputs & {
   legs: readonly NoteLeg[];
   contracts?: PredictContracts;
 }) {

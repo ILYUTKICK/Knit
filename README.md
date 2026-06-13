@@ -27,9 +27,45 @@ Knit — стартовый каркас для Sui Overflow 2026 / DeepBook Pre
 ```bash
 npm run core:test
 npm run web:check
+cd move/knit && /Users/ilyutkinn/.local/bin/sui move build
 ```
 
-Обе проверки сейчас проходят. `sui` CLI на этой машине не установлен, поэтому `sui move build` пока не запускался.
+Все проверки сейчас проходят. `sui move build` дает только lint warnings про transfer-to-sender в `withdraw_fees`, `redeem_note` и refund path.
+
+## Direct Predict smoke-test
+
+Dry-run quote через публичный Predict server и `devInspect`:
+
+```bash
+npm run smoke:direct
+```
+
+Проверить сразу binary и range quotes:
+
+```bash
+npm run smoke:direct -- --range-check
+```
+
+Скрипт берет активный будущий BTC oracle, строит `MarketKey` / `RangeKey`, вызывает `predict::get_trade_amounts` / `predict::get_range_trade_amounts` через `devInspect` и показывает, хватает ли кошельку SUI/dUSDC.
+
+Текущий testnet address:
+
+```text
+0xbc873ba5271810e3ae49616029d958d215cdba9c101e42f78c9de484060f260e
+```
+
+Funding:
+
+- SUI faucet: https://faucet.sui.io/?address=0xbc873ba5271810e3ae49616029d958d215cdba9c101e42f78c9de484060f260e
+- dUSDC request: https://tally.so/r/Xx102L
+
+После funding:
+
+```bash
+npm run smoke:direct -- --execute
+```
+
+`--execute` один раз создаст `PredictManager`, закэширует его в локальном `.knit-smoke.json`, затем выполнит `deposit + predict::mint` для одной binary leg.
 
 ## Открыть прототип
 
@@ -66,14 +102,13 @@ Quote DUSDC      = 0xe95040085976bfd54a1a07225cd46c8a2b4e8e2b6732f140a0fc49850ba
 
 ## Следующий живой e2e
 
-1. Установить Sui CLI.
-2. Проверить `sui move build` в `move/knit`.
+1. Получить SUI gas и dUSDC на testnet address выше.
+2. Запустить `npm run smoke:direct -- --execute` и сохранить digest успешного direct mint.
 3. Опубликовать `knit` на testnet.
 4. Вызвать `knit::create_registry<DUSDC>(fee_bps)`.
-5. Один раз создать `PredictManager` для demo wallet.
-6. Подключить `packages/core/src/transactions.ts` к dAppKit/Enoki.
-7. Сделать `devInspect` quote, затем live `create_*_note`.
-8. На settled oracle прогнать `redeem_note` и показать DUSDC payout.
+5. Подключить `packages/core/src/transactions.ts` к dAppKit/Enoki.
+6. Сделать `devInspect` quote, затем live `create_*_note` через Knit-router.
+7. На settled oracle прогнать `redeem_note` и показать DUSDC payout.
 
 ## Источники
 
