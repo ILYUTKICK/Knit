@@ -34,6 +34,7 @@ export type KnitCreateParams = ManagerOracleInputs & {
   paymentCoinId: string;
   maxPayment: bigint | number | string;
   deployment: KnitDeployment;
+  recipient: string;
   contracts?: PredictContracts;
 };
 
@@ -120,7 +121,7 @@ export function buildKnitRangeNoteTx(
   const tx = new Transaction();
   const [payment] = tx.splitCoins(tx.object(params.paymentCoinId), [u64(tx, params.maxPayment)]);
 
-  tx.moveCall({
+  const note = tx.moveCall({
     target: `${params.deployment.packageId}::knit::create_range_note`,
     typeArguments: [contracts.quoteType],
     arguments: [
@@ -135,6 +136,7 @@ export function buildKnitRangeNoteTx(
       tx.object(SUI_CLOCK_OBJECT_ID),
     ],
   });
+  tx.transferObjects([note], tx.pure.address(params.recipient));
 
   return tx;
 }
@@ -150,7 +152,7 @@ export function buildKnitBreakoutNoteTx(
   const tx = new Transaction();
   const [payment] = tx.splitCoins(tx.object(params.paymentCoinId), [u64(tx, params.maxPayment)]);
 
-  tx.moveCall({
+  const note = tx.moveCall({
     target: `${params.deployment.packageId}::knit::create_breakout_note`,
     typeArguments: [contracts.quoteType],
     arguments: [
@@ -165,6 +167,7 @@ export function buildKnitBreakoutNoteTx(
       tx.object(SUI_CLOCK_OBJECT_ID),
     ],
   });
+  tx.transferObjects([note], tx.pure.address(params.recipient));
 
   return tx;
 }
@@ -179,7 +182,7 @@ export function buildKnitLadderNoteTx(
   const tx = new Transaction();
   const [payment] = tx.splitCoins(tx.object(params.paymentCoinId), [u64(tx, params.maxPayment)]);
 
-  tx.moveCall({
+  const note = tx.moveCall({
     target: `${params.deployment.packageId}::knit::create_ladder_note`,
     typeArguments: [contracts.quoteType],
     arguments: [
@@ -195,6 +198,7 @@ export function buildKnitLadderNoteTx(
       tx.object(SUI_CLOCK_OBJECT_ID),
     ],
   });
+  tx.transferObjects([note], tx.pure.address(params.recipient));
 
   return tx;
 }
