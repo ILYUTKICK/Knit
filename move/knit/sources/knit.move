@@ -44,7 +44,7 @@ public struct NoteRegistry<phantom Quote> has key {
     fee_vault: Balance<Quote>,
 }
 
-public struct NoteReceipt has key {
+public struct NoteReceipt has key, store {
     id: UID,
     manager_id: ID,
     oracle_id: ID,
@@ -130,7 +130,7 @@ public fun create_range_note<Quote>(
     quantity: u64,
     clock: &Clock,
     ctx: &mut TxContext,
-) {
+): NoteReceipt {
     assert!(lower_strike < higher_strike, E_BAD_TEMPLATE_PARAMS);
     assert!(quantity > 0, E_BAD_TEMPLATE_PARAMS);
 
@@ -155,7 +155,7 @@ public fun create_range_note<Quote>(
         quantity,
         clock,
         ctx,
-    );
+    )
 }
 
 public fun create_breakout_note<Quote>(
@@ -169,7 +169,7 @@ public fun create_breakout_note<Quote>(
     quantity: u64,
     clock: &Clock,
     ctx: &mut TxContext,
-) {
+): NoteReceipt {
     assert!(lower_strike < higher_strike, E_BAD_TEMPLATE_PARAMS);
     assert!(quantity > 0, E_BAD_TEMPLATE_PARAMS);
 
@@ -188,7 +188,7 @@ public fun create_breakout_note<Quote>(
         quantity,
         clock,
         ctx,
-    );
+    )
 }
 
 public fun create_ladder_note<Quote>(
@@ -203,7 +203,7 @@ public fun create_ladder_note<Quote>(
     quantity: u64,
     clock: &Clock,
     ctx: &mut TxContext,
-) {
+): NoteReceipt {
     assert!(strike_1 < strike_2 && strike_2 < strike_3, E_BAD_TEMPLATE_PARAMS);
     assert!(quantity > 0, E_BAD_TEMPLATE_PARAMS);
 
@@ -223,7 +223,7 @@ public fun create_ladder_note<Quote>(
         quantity * 3,
         clock,
         ctx,
-    );
+    )
 }
 
 public fun redeem_note<Quote>(
@@ -315,7 +315,7 @@ fun create_note_from_legs<Quote>(
     max_payout: u64,
     clock: &Clock,
     ctx: &mut TxContext,
-) {
+): NoteReceipt {
     assert!(oracle::is_active(oracle), E_ORACLE_NOT_ACTIVE);
     assert!(manager.owner() == ctx.sender(), E_NOT_MANAGER_OWNER);
 
@@ -367,7 +367,7 @@ fun create_note_from_legs<Quote>(
         max_payout,
     });
 
-    transfer::transfer(receipt, ctx.sender());
+    receipt
 }
 
 fun mint_leg<Quote>(

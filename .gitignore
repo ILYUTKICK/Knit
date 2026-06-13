@@ -4,6 +4,7 @@ dist/
 .turbo/
 move/**/build/
 .knit-smoke.json
+.knit-deployment.*.json
 .DS_Store
 *.log
 .env

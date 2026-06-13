@@ -6,13 +6,13 @@ This note tracks the first technical gate from `knit-build-plan.md`: prove Knit 
 
 - Sui CLI is installed at `/Users/ilyutkinn/.local/bin/sui`.
 - Active Sui env is `testnet`.
-- Active testnet address is `0xbc873ba5271810e3ae49616029d958d215cdba9c101e42f78c9de484060f260e`.
+- Active testnet address is `0xf424d07e6a6482b591466fdc8f62c388735ac1e84969eb8d1e80048d6881637a`.
 - `move/knit` builds successfully.
 - `npm run smoke:direct -- --range-check` successfully picks an active future BTC oracle and gets both binary and range quotes through `devInspect`.
 
 The live mint step is waiting on faucet funding:
 
-- SUI gas: https://faucet.sui.io/?address=0xbc873ba5271810e3ae49616029d958d215cdba9c101e42f78c9de484060f260e
+- SUI gas: https://faucet.sui.io/?address=0xf424d07e6a6482b591466fdc8f62c388735ac1e84969eb8d1e80048d6881637a
 - dUSDC: https://tally.so/r/Xx102L
 
 ## Commands

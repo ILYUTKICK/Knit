@@ -9,7 +9,8 @@ Knit — стартовый каркас для Sui Overflow 2026 / DeepBook Pre
   - `create_breakout_note`
   - `create_ladder_note`
   - `redeem_note`
-  - `NoteReceipt` и `NoteCreated` / `NoteRedeemed` events
+  - `NoteReceipt` (`has key, store` — composable token) и `NoteCreated` / `NoteRedeemed` events
+  - `create_*_note` **возвращают** `NoteReceipt` (PTB-composable), а не self-transfer'ят
 - `packages/core` — TS-core:
   - шаблоны нот и payoff-функции
   - билдеры PTB для прямого Predict smoke-test
@@ -30,7 +31,7 @@ npm run web:check
 cd move/knit && /Users/ilyutkinn/.local/bin/sui move build
 ```
 
-Все проверки сейчас проходят. `sui move build` дает только lint warnings про transfer-to-sender в `withdraw_fees`, `redeem_note` и refund path.
+Все проверки сейчас проходят. `sui move build` дает только lint warnings про transfer-to-sender в `withdraw_fees`, `redeem_note` (payout) и refund path — это осознанно: сдача DUSDC, выплата и комиссии правильно идут в кошелёк. Сама `NoteReceipt` теперь возвращается из функции (composable), без self-transfer.
 
 ## Direct Predict smoke-test
 
@@ -51,12 +52,12 @@ npm run smoke:direct -- --range-check
 Текущий testnet address:
 
 ```text
-0xbc873ba5271810e3ae49616029d958d215cdba9c101e42f78c9de484060f260e
+0xf424d07e6a6482b591466fdc8f62c388735ac1e84969eb8d1e80048d6881637a
 ```
 
 Funding:
 
-- SUI faucet: https://faucet.sui.io/?address=0xbc873ba5271810e3ae49616029d958d215cdba9c101e42f78c9de484060f260e
+- SUI faucet: https://faucet.sui.io/?address=0xf424d07e6a6482b591466fdc8f62c388735ac1e84969eb8d1e80048d6881637a
 - dUSDC request: https://tally.so/r/Xx102L
 
 После funding:
@@ -85,7 +86,7 @@ npm run smoke:direct -- --execute
 
 3. `PredictManager` создается через `predict::create_manager`, который сразу шарит manager object. Поэтому лучше считать manager one-time setup транзакцией. Note mint PTB = `deposit + N x mint`, но не `create_manager + deposit + mint`.
 
-4. В варианте A receipt не должен быть свободно переносимым. `PredictManager` редимится только владельцем manager, так что transferable note честно появляется только в escrow/NFT варианте B. Поэтому текущий `NoteReceipt` имеет `key`, но не `store`.
+4. `NoteReceipt` имеет `has key, store` и **возвращается** из `create_*_note` — это composable token поверх `PredictManager` (прямое попадание в named criterion problem statement про "tokenized share tokens"). В варианте A (MVP) выплата по `redeem_note` идёт владельцу manager, поэтому свободная вторичная торговля нотой честно появляется только в escrow/NFT варианте B. Но `store`-ability и возврат объекта из PTB закладываем с самого начала — нота держится в кошельке, читается публичными геттерами и может быть передана/использована другим контрактом уже сейчас.
 
 5. `redeem_note` снимает только дельту баланса manager: `balance_after - balance_before`. Это защищает от случайного `withdraw_all`, если в manager лежат другие средства.
 
