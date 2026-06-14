@@ -49,16 +49,16 @@ Breakout (2) and ladder (3) mints land atomically in a single transaction — th
 `knit::redeem_note` redeems every leg, measures the manager balance delta, withdraws
 exactly that payout, emits `NoteRedeemed`. `npm run smoke:redeem -- --template <t>`.
 
-| What | Value |
-|---|---|
-| Note redeemed | range (`0xc0a6e008…2a2b73`) |
-| **Redeem digest** | `FfXJVmbSv5t4RimmfNEcG3px4p79X9pVfw1xn1QFoBRf` (success) |
-| Path | early exit (oracle still `Active`, sold at live quote — no settlement wait) |
-| Payout | `7835` base units = 0.007835 dUSDC, returned to the owner wallet |
+Both redeem paths exercised — early exit (Active) and settled price (after expiry):
+
+| Note | Redeem digest | Path | Payout |
+|---|---|---|---|
+| range (`0xc0a6e008…`) | `FfXJVmbSv5t4RimmfNEcG3px4p79X9pVfw1xn1QFoBRf` | early exit (oracle Active, live quote) | 0.007835 dUSDC |
+| breakout (`0xdc9ce63d…`) | `DEWsSSRd1Axfe91ojd9bz57rLonKobDweJUQkQkzKxuJ` | **settled** (after expiry, settled price) | **1.000000 dUSDC (full — won)** |
 
 **Full end-to-end is proven on testnet:** deposit dUSDC → mint a structured note in one
-atomic PTB → redeem → dUSDC back to the wallet. The breakout and ladder notes remain open
-(can be redeemed early or left to settle at expiry).
+atomic PTB → redeem → dUSDC back to the wallet. The breakout strangle settled in-the-money
+(BTC outside the corridor) and paid its full max payout. The ladder note remains open.
 
 ## Live composability — knit_demo (Phase 6, live)
 
