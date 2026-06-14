@@ -10,6 +10,8 @@
     "core:test": "node --test --experimental-strip-types packages/core/src/templates.test.ts",
     "smoke:direct": "node --experimental-strip-types scripts/smoke-direct.ts",
     "smoke:knit": "node --experimental-strip-types scripts/smoke-knit.ts",
+    "smoke:redeem": "node --experimental-strip-types scripts/smoke-redeem.ts",
+    "smoke:collateral": "node --experimental-strip-types scripts/smoke-collateral.ts",
     "deploy:save": "node --experimental-strip-types scripts/save-deployment.ts",
     "web:check": "node --check apps/web/src/app.js"
   },
