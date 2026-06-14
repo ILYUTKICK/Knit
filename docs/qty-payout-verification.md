@@ -2,7 +2,7 @@
 
 Closes open question #4 from the production spec (§15) and the WIN-track blocker
 before any frontend money numbers are shown: **what does `quantity` mean, and how
-do we map it to "вложишь X / макс. выплата Y"?**
+do we map it to "you pay X / max payout Y"?**
 
 ## Method
 
@@ -51,14 +51,14 @@ In dUSDC (÷ 1e6):
 
 For a note built from legs `L`:
 
-- **"Вложишь X"** (cost) = `Σ over legs ( get_*_trade_amounts(leg).return0 )` + Knit fee.
+- **"You pay X"** (cost) = `Σ over legs ( get_*_trade_amounts(leg).return0 )` + Knit fee.
   This is the only number that comes from `devInspect`.
-- **"Макс. выплата Y"** = `NoteDefinition.maxPayout`, computed from `quantity`, **NOT**
+- **"Max payout Y"** = `NoteDefinition.maxPayout`, computed from `quantity`, **NOT**
   from any `devInspect` return value:
   - range: `quantity` (single band pays `q` if settle ∈ band)
   - breakout: `quantity` (only one of down@low / up@high can be ITM — never both)
   - ladder: `quantity * 3` (all three up-legs are ITM simultaneously if settle > K3)
-- **"Шанс / breakeven"** = derived for UX only (implied probability = cost / maxPayout
+- **"Chance / breakeven"** = derived for UX only (implied probability = cost / maxPayout
   per leg); marketing banner, not trading logic.
 
 ## Consequences confirmed

@@ -1,119 +1,144 @@
 # Knit
 
-Knit — стартовый каркас для Sui Overflow 2026 / DeepBook Predict track: структурные ноты из нескольких Predict-ног, собранные в один атомарный PTB.
+**Composable structured notes on DeepBook Predict (Sui).**
 
-## Что уже собрано
+Knit bundles several DeepBook Predict legs — binary positions and vertical ranges — into a
+single structured note minted in **one atomic PTB**, and hands the user a composable
+`NoteReceipt` object. Three retail products (Range, Breakout, Ladder) abstract strikes and
+greeks into a payoff diagram anyone can read.
 
-- `move/knit` — Move router поверх DeepBook Predict:
-  - `create_range_note`
-  - `create_breakout_note`
-  - `create_ladder_note`
-  - `redeem_note`
-  - `NoteReceipt` (`has key, store` — composable token) и `NoteCreated` / `NoteRedeemed` events
-  - `create_*_note` **возвращают** `NoteReceipt` (PTB-composable), а не self-transfer'ят
-- `packages/core` — TS-core:
-  - шаблоны нот и payoff-функции
-  - билдеры PTB для прямого Predict smoke-test
-  - билдеры PTB для Knit-router после деплоя Move package
-  - минимальный клиент публичного Predict server
-- `apps/web` — статический UX-прототип конструктора:
-  - три шаблона
-  - sliders по страйкам и notional
-  - payoff canvas
-  - демо-портфель
-- `docs/deepbook-track-fit.md` — привязка Knit к официальному problem statement.
+Built for Sui Overflow 2026 · Special — DeepBook track.
 
-## Проверки
+## Why this is different
+
+On DeepBook Predict, positions are **not objects** — they live as rows in a shared
+`PredictManager` table; you cannot hold, transfer, or hand them to another contract. Knit
+wraps a bundle of positions into one `NoteReceipt` (`has key, store`) — the first
+**holdable, transferable, composable** representation of a Predict position set. That is the
+"tokenized share token on top of `PredictManager`" the problem statement explicitly asks for,
+and it is what lets a structured note plug into the wider Sui DeFi stack (margin collateral,
+LP, structured wrappers) on mainnet day-one.
+
+## The three products
+
+- **Range — "stay in range":** one `mint_range` leg. Pays if settle lands in `(low, high]`.
+- **Breakout — "big move":** two binary legs (`up @ high` + `down @ low`). A digital strangle —
+  pays if price breaks out either side.
+- **Ladder — "higher = more":** three ascending `up` binaries. A capped digital call-spread —
+  `0 → q → 2q → 3q` as strikes are crossed.
+
+Every note's payoff is `Σ` of its legs, so the payoff chart and pricing are template-agnostic.
+
+## Live on testnet
+
+Knit is deployed and proven end-to-end on Sui testnet against the live DeepBook Predict
+deployment (`predict-testnet-4-16`). Full digest trail in [docs/testnet-digests.md](docs/testnet-digests.md).
+
+```
+Knit package    : 0xf5b66db021ad7ee7cea7d3f577117bae358e5aded21161076636bdc75f551ad0
+Knit registry   : 0x83eedf91118eebc29b62cdd19481f65ab6d9f5b4229bf2206ea3fdfa03848091
+Collateral demo : 0x4ad0f8219db68dbb02b3b2e8514010756ea2d1d6f7b84e1990b940076453c2df
+Predict package : 0xf5ea2b3749c65d6e56507cc35388719aadb28f9cab873696a2f8687f5c785138
+Quote (dUSDC)   : 0xe95040085976bfd54a1a07225cd46c8a2b4e8e2b6732f140a0fc49850ba73e1a::dusdc::DUSDC
+```
+
+What has been proven on-chain:
+
+- **Direct mint** against live Predict (`deposit` + `predict::mint`).
+- **Router notes** — Range, Breakout (2 mints), Ladder (3 mints), each in one atomic PTB.
+- **Redeem** both ways — early exit (oracle `Active`) and settled price (after expiry; the
+  breakout strangle settled in-the-money and paid its full 1 dUSDC).
+- **Composability, live** — an independent package (`knit_demo`) pledges a real `NoteReceipt`
+  as collateral, reads its getters on-chain, and returns it.
+
+## How it works
+
+```
+Frontend (apps/web)                 Knit Move package (move/knit)
+  • pick template, slide strikes      • create_range_note / create_breakout_note
+  • live devInspect quote               / create_ladder_note  -> returns NoteReceipt
+  • one-tap Create (wallet PTB)       • redeem_note (balance-delta payout, NoteRedeemed)
+        │                             • NoteRegistry, NoteCreated events
+        ▼                                     │ on-chain
+  DeepBook Predict testnet  ◄─────────────────┘
+  Predict / PredictManager / OracleSVI / Vault
+```
+
+- `create_*_note` charges the Knit fee, deposits the payment into the user's `PredictManager`,
+  mints every leg via `predict::mint` / `predict::mint_range` in the same PTB, refunds the
+  unused quote, and **returns** the `NoteReceipt` so a PTB can chain it (transfer, pledge, …).
+- `redeem_note` redeems every leg, measures the manager balance delta, withdraws exactly that
+  payout, and burns the receipt. The delta approach is robust even when one manager is reused
+  across notes (the canonical per-user pattern).
+- `knit_demo::collateral_vault` is an independent package proving the note is composable
+  collateral.
+
+## Repo layout
+
+- `move/knit` — the router package (`knit.move`).
+- `move/knit_demo` — composability demo: external package consuming `NoteReceipt`.
+- `packages/core` — TypeScript core: templates/payoff, PTB builders, Predict server client.
+- `scripts` — smoke tooling (`smoke:direct`, `smoke:knit`, `smoke:redeem`, `smoke:collateral`, `deploy:save`).
+- `apps/web` — functional vanilla-JS frontend (live oracle, real quotes, wallet mint).
+- `docs` — track fit, qty→payout verification, on-chain digest trail.
+
+## Quickstart
 
 ```bash
+npm install
+
+# unit tests + checks
 npm run core:test
 npm run web:check
-cd move/knit && /Users/ilyutkinn/.local/bin/sui move build
-```
+cd move/knit && sui move build
+cd move/knit_demo && sui move test --allow-dirty   # cross-package composability test
 
-Все проверки сейчас проходят. `sui move build` дает только lint warnings про transfer-to-sender в `withdraw_fees`, `redeem_note` (payout) и refund path — это осознанно: сдача DUSDC, выплата и комиссии правильно идут в кошелёк. Сама `NoteReceipt` теперь возвращается из функции (composable), без self-transfer.
-
-## Direct Predict smoke-test
-
-Dry-run quote через публичный Predict server и `devInspect`:
-
-```bash
-npm run smoke:direct
-```
-
-Проверить сразу binary и range quotes:
-
-```bash
+# read-only smoke (no funds needed): pick a live oracle and quote via devInspect
 npm run smoke:direct -- --range-check
+npm run smoke:knit -- --template range            # also: breakout, ladder
 ```
 
-Скрипт берет активный будущий BTC oracle, строит `MarketKey` / `RangeKey`, вызывает `predict::get_trade_amounts` / `predict::get_range_trade_amounts` через `devInspect` и показывает, хватает ли кошельку SUI/dUSDC.
-
-Текущий testnet address:
-
-```text
-0xf424d07e6a6482b591466fdc8f62c388735ac1e84969eb8d1e80048d6881637a
-```
-
-Funding:
-
-- SUI faucet: https://faucet.sui.io/?address=0xf424d07e6a6482b591466fdc8f62c388735ac1e84969eb8d1e80048d6881637a
-- dUSDC request: https://tally.so/r/Xx102L
-
-После funding:
+With SUI gas and dUSDC ([request dUSDC](https://tally.so/r/Xx102L)):
 
 ```bash
-npm run smoke:direct -- --execute
+npm run smoke:direct -- --execute                       # first live mint
+npm run smoke:knit -- --template breakout --execute     # note via router
+npm run smoke:redeem -- --template breakout             # redeem
+npm run smoke:collateral -- --template ladder           # pledge note as collateral
 ```
 
-`--execute` один раз создаст `PredictManager`, закэширует его в локальном `.knit-smoke.json`, затем выполнит `deposit + predict::mint` для одной binary leg.
+### Frontend
 
-## Открыть прототип
+Wallets require http(s), so serve over localhost:
 
-Открой в браузере:
-
-```text
-/Users/ilyutkinn/Desktop/Knit/apps/web/index.html
+```bash
+npm run web:serve     # http://localhost:8000
 ```
 
-Это статический прототип без wallet-интеграции. Реальная подпись, zkLogin/Enoki и запросы к testnet идут следующим слоем.
+Open it, connect a Sui wallet (e.g. Slush) on testnet, slide the strikes (the cost is a live
+`devInspect` quote), and tap **Create** to mint a note through the router.
 
-## Важные поправки к production spec
+## Stack
 
-1. `predict::mint` и `predict::mint_range` принимают `MarketKey` / `RangeKey`, а не raw strikes. TS direct-builder и Move-router собирают ключи через `market_key::new` и `range_key::new`.
+- **Move** — `knit` package (depends on Predict `predict-testnet-4-16`).
+- **SDK/PTB** — `@mysten/sui` (Transaction), `@mysten/wallet-standard`.
+- **Frontend** — vanilla JS + canvas payoff chart, ESM from CDN, no build step.
 
-2. `MarketKey` / `RangeKey` должны содержать настоящий `expiry` оракула. Для direct/quote PTB `expiryMs` надо брать из `/oracles/:oracle_id/state`.
+## Notes for builders
 
-3. `PredictManager` создается через `predict::create_manager`, который сразу шарит manager object. Поэтому лучше считать manager one-time setup транзакцией. Note mint PTB = `deposit + N x mint`, но не `create_manager + deposit + mint`.
+`predict::mint` / `mint_range` take `MarketKey` / `RangeKey` (built via `market_key::new` /
+`range_key::new` with the oracle's real `expiry`), not raw strikes. `quantity` is in payout
+base units (`q` contracts pay `q` base units = `q / 1e6` dUSDC if in-the-money);
+`get_trade_amounts` returns `(mint_cost, redeem_now)`, not the max payout — see
+[docs/qty-payout-verification.md](docs/qty-payout-verification.md).
 
-4. `NoteReceipt` имеет `has key, store` и **возвращается** из `create_*_note` — это composable token поверх `PredictManager` (прямое попадание в named criterion problem statement про "tokenized share tokens"). В варианте A (MVP) выплата по `redeem_note` идёт владельцу manager, поэтому свободная вторичная торговля нотой честно появляется только в escrow/NFT варианте B. Но `store`-ability и возврат объекта из PTB закладываем с самого начала — нота держится в кошельке, читается публичными геттерами и может быть передана/использована другим контрактом уже сейчас.
+The `predict-testnet-4-16` dependency ships without `published-at`; see
+[docs/testnet-digests.md](docs/testnet-digests.md) for how the router was published against
+the live deployment.
 
-5. `redeem_note` снимает только дельту баланса manager: `balance_after - balance_before`. Это защищает от случайного `withdraw_all`, если в manager лежат другие средства.
+## Sources
 
-6. По официальному problem statement Knit лучше подавать как structured-product app, а не vault. Vault-режим потребует simulation results. См. [docs/deepbook-track-fit.md](docs/deepbook-track-fit.md).
-
-## Testnet config
-
-```ts
-Predict package  = 0xf5ea2b3749c65d6e56507cc35388719aadb28f9cab873696a2f8687f5c785138
-Predict registry = 0x43af14fed5480c20ff77e2263d5f794c35b9fab7e2212903127062f4fe2a6e64
-Predict object   = 0xc8736204d12f0a7277c86388a68bf8a194b0a14c5538ad13f22cbd8e2a38028a
-Quote DUSDC      = 0xe95040085976bfd54a1a07225cd46c8a2b4e8e2b6732f140a0fc49850ba73e1a::dusdc::DUSDC
-```
-
-## Следующий живой e2e
-
-1. Получить SUI gas и dUSDC на testnet address выше.
-2. Запустить `npm run smoke:direct -- --execute` и сохранить digest успешного direct mint.
-3. Опубликовать `knit` на testnet.
-4. Вызвать `knit::create_registry<DUSDC>(fee_bps)`.
-5. Подключить `packages/core/src/transactions.ts` к dAppKit/Enoki.
-6. Сделать `devInspect` quote, затем live `create_*_note` через Knit-router.
-7. На settled oracle прогнать `redeem_note` и показать DUSDC payout.
-
-## Источники
-
-- DeepBook Predict `predict.move`: https://github.com/MystenLabs/deepbookv3/blob/predict-testnet-4-16/packages/predict/sources/predict.move
-- DeepBook Predict `predict_manager.move`: https://github.com/MystenLabs/deepbookv3/blob/predict-testnet-4-16/packages/predict/sources/predict_manager.move
-- `MarketKey` / `RangeKey`: https://github.com/MystenLabs/deepbookv3/tree/predict-testnet-4-16/packages/predict/sources/market_key
+- DeepBook Predict (`predict.move`, branch `predict-testnet-4-16`):
+  https://github.com/MystenLabs/deepbookv3/tree/predict-testnet-4-16/packages/predict
 - Public Predict server: https://predict-server.testnet.mystenlabs.com
+- DeepBook Predict docs: https://docs.sui.io/onchain-finance/deepbook-predict/

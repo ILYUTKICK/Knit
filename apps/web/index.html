@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -15,7 +15,7 @@
         </div>
         <div class="wallet-strip">
           <button class="icon-button" id="faucetButton" type="button" title="Faucet">D</button>
-          <button class="primary-button" id="walletButton" type="button">Google</button>
+          <button class="primary-button" id="walletButton" type="button">Connect</button>
         </div>
       </header>
 
@@ -24,17 +24,17 @@
           <div class="template-grid" role="tablist" aria-label="Product templates">
             <button class="template-card is-active" type="button" data-template="range" role="tab" aria-selected="true">
               <span>Range</span>
-              <strong>В коридоре</strong>
+              <strong>Stay in range</strong>
               <small>1 range leg</small>
             </button>
             <button class="template-card" type="button" data-template="breakout" role="tab" aria-selected="false">
               <span>Breakout</span>
-              <strong>Будет движ</strong>
+              <strong>Big move</strong>
               <small>2 binary legs</small>
             </button>
             <button class="template-card" type="button" data-template="ladder" role="tab" aria-selected="false">
               <span>Ladder</span>
-              <strong>Чем выше</strong>
+              <strong>Higher = more</strong>
               <small>3 binary legs</small>
             </button>
           </div>
@@ -43,7 +43,7 @@
             <div class="chart-head">
               <div>
                 <p class="eyebrow">BTC oracle</p>
-                <h2 id="templateTitle">В коридоре</h2>
+                <h2 id="templateTitle">Stay in range</h2>
               </div>
               <div class="spot-tile">
                 <span>Spot</span>
@@ -80,15 +80,15 @@
         <aside class="side-panel" aria-label="Quote panel">
           <div class="metrics">
             <div class="metric">
-              <span>Вложишь</span>
+              <span>You pay</span>
               <strong id="costMetric">$3.15</strong>
             </div>
             <div class="metric">
-              <span>Макс.</span>
+              <span>Max</span>
               <strong id="maxMetric">$10.00</strong>
             </div>
             <div class="metric">
-              <span>Шанс</span>
+              <span>Chance</span>
               <strong id="chanceMetric">34%</strong>
             </div>
             <div class="metric">
@@ -97,7 +97,7 @@
             </div>
           </div>
 
-          <button class="create-button" id="createButton" type="button">Создать</button>
+          <button class="create-button" id="createButton" type="button">Create</button>
 
           <div class="tx-preview">
             <div>
@@ -116,7 +116,7 @@
 
           <section class="portfolio" aria-label="Portfolio">
             <div class="section-head">
-              <h2>Мои ноты</h2>
+              <h2>My notes</h2>
               <span id="noteCount">0</span>
             </div>
             <div class="note-list" id="noteList"></div>

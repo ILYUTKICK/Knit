@@ -13,7 +13,8 @@
     "smoke:redeem": "node --experimental-strip-types scripts/smoke-redeem.ts",
     "smoke:collateral": "node --experimental-strip-types scripts/smoke-collateral.ts",
     "deploy:save": "node --experimental-strip-types scripts/save-deployment.ts",
-    "web:check": "node --check apps/web/src/app.js"
+    "web:check": "node --check apps/web/src/app.js && node --check apps/web/src/chain.js",
+    "web:serve": "python3 -m http.server 8000 --directory apps/web"
   },
   "devDependencies": {
     "@mysten/sui": "^1.30.0",
