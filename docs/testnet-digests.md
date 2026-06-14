@@ -16,11 +16,23 @@ DeepBook Predict testnet (`predict-testnet-4-16`). Address `0xf424d07e6a6482b591
 
 Knit is **live on testnet**. IDs are also in `.knit-deployment.testnet.json` (gitignored local state).
 
-## Pending (need dUSDC)
+## Direct Predict mint (Phase 2)
 
-- [ ] Direct Predict mint (`smoke:direct --execute`)
-- [ ] Range / Breakout / Ladder notes via router
-- [ ] Redeem (settled or early-exit)
+First live end-to-end proof: `create_manager` → `predict_manager::deposit` → `predict::mint`
+against the live DeepBook Predict testnet. `npm run smoke:direct -- --execute`.
+
+| What | Value |
+|---|---|
+| Manager create digest | `3SVwyP9sevv7f9uz3DzFQgA6iM4j3WUdbEA1fSkBRXUy` |
+| PredictManager | `0xb5e4d0985f1f9dcf64637dea3b6622767d4ac02d866f673663f75a7621c028cb` |
+| **Mint digest** | `9iCYmqSMrnKrbGV8pa4KEGoEJDtc9UHiyV4ethGeDoh` (success) |
+| Oracle | `0x18b5b4676255d4357833d9d2be02d4b2a5a15b02c07b2c7828a80bbf87c63d6c` |
+| Binary leg | up @ 64294, q = 1 dUSDC unit; mint cost ≈ 0.5114 dUSDC |
+
+## Pending
+
+- [ ] Range / Breakout / Ladder notes via router (Phase 4 live)
+- [ ] Redeem (settled or early-exit) (Phase 5)
 
 ## Reproducing the publish (dependency published-at)
 
