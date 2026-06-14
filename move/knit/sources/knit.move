@@ -441,3 +441,21 @@ fun destroy_receipt(receipt: NoteReceipt, status: u8) {
     assert!(old_status != status, E_ALREADY_REDEEMED);
     object::delete(id);
 }
+
+#[test_only]
+/// Build a NoteReceipt without touching the live Predict protocol, so external
+/// packages can unit-test composability (pledging/holding/inspecting a note).
+public fun new_note_for_testing(template: u8, max_payout: u64, ctx: &mut TxContext): NoteReceipt {
+    NoteReceipt {
+        id: object::new(ctx),
+        manager_id: object::id_from_address(@0x0),
+        oracle_id: object::id_from_address(@0x0),
+        expiry: 0,
+        template,
+        legs: vector[],
+        cost_paid: 0,
+        max_payout,
+        created_at_ms: 0,
+        status: STATUS_OPEN,
+    }
+}
